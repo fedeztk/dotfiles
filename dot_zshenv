@@ -1,0 +1,41 @@
+set -o allexport
+
+XDG_STATE_HOME="$HOME/.local/state"
+XDG_DATA_HOME="$HOME/.local/share"
+XDG_CONFIG_HOME="$HOME/.config"
+XDG_CACHE_HOME="$HOME/.cache"
+
+GEM_HOME="${XDG_DATA_HOME}"/gem
+GEM_SPEC_CACHE="${XDG_CACHE_HOME}"/gem
+
+FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+FZF_DEFAULT_OPTS=' --inline-info --layout reverse --color=dark --color=fg:-1,bg:-1,hl:green,fg+:bright-cyan,bg+:-1,hl+:cyan,border:blue --color=info:blue,prompt:green,pointer:magenta,marker:magenta,spinner:yellow '
+
+VISUAL="hx"
+EDITOR=$VISUAL
+
+PAGER="bat"
+MANPAGER=$PAGER
+
+PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/.cargo/bin:$PATH"
+PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+
+CHTSH_QUERY_OPTIONS="style=lovelace"
+
+# ZSH SPECIFIC
+ZDOTDIR="$HOME"/.config/zsh
+HISTFILE=${ZDOTDIR:-~}/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
+
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_USE_ASYNC="true"
+
+# zsh_system_clipboard plugin
+ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT=true
+ZSH_SYSTEM_CLIPBOARD_METHOD=tmux
+
+set -o allexport

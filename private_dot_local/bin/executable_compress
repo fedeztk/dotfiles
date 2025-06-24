@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# compress files passed as arguemnt
+
+files="$*"
+
+if [[ ! "$files" ]]; then
+    echo "Usage: compress *list of files*"
+    exit 1
+fi
+
+echo "What name should have the compressed archive!"
+read -r str
+
+if [[ ! "$str" ]]; then
+    echo "Name of the archive can't be empty!"
+    exit 1
+fi
+
+echo "What compresssion do you need?"
+echo "1) zip"
+echo "2) tar"
+echo "*) exit (default)"
+
+function comp_tar() {
+    set -f
+    mkdir "$str"
+    cp -r "$files" "$str"
+    tar czf "$str".tar.gz "$str"
+    rm -rf "$str"
+}
+ 
+function comp_zip() {
+    set -f
+    mkdir "$str"
+    cp -r "$files" "$str"
+    zip -r "$str".zip "$str"
+    rm -rf "$str"
+}
+
+read -p "$* Compression: " sel
+case $sel in
+    1) comp_zip ;;
+    2) comp_tar ;;
+    *) echo "Invalid compresssion method" ;;
+esac

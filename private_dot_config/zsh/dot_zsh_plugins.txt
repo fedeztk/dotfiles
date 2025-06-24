@@ -1,0 +1,19 @@
+ohmyzsh/ohmyzsh path:plugins/command-not-found
+#ohmyzsh/ohmyzsh path:plugins/git
+
+zsh-users/zsh-syntax-highlighting
+zsh-users/zsh-autosuggestions
+#agkozak/zsh-z
+
+ohmyzsh/ohmyzsh path:plugins/fzf
+Aloxaf/fzf-tab
+
+reegnz/jq-zsh-plugin
+hlissner/zsh-autopair
+kutsan/zsh-system-clipboard
+
+tldr-pages/tldr-node-client path:bin/completion/zsh/_tldr kind:fpath
+
+MichaelAquilina/zsh-you-should-use
+
+zsh-users/zsh-history-substring-search

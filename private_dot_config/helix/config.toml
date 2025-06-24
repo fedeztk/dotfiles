@@ -1,0 +1,35 @@
+theme = "onedark_transparent"
+
+[editor]
+true-color=true
+color-modes=true
+line-number="relative"
+
+end-of-line-diagnostics = "hint"
+
+bufferline = "multiple"
+
+[editor.inline-diagnostics]
+cursor-line = "warning" # show warnings and errors on the cursorline inline
+
+[editor.cursor-shape]
+insert="bar"
+
+
+[editor.statusline]
+center=["version-control"]
+
+[editor.file-picker]
+hidden=false
+
+[keys.normal]
+C-g = [":new", ":insert-output lazygit", ":buffer-close!", ":redraw"]
+S-x = ["extend_line_above"]
+
+[keys.normal.space.o]
+# Open file(s) in the current window
+o = ":sh tmux new-window -n fx '~/.config/helix/yazi-picker.sh open'"
+# Open file(s) in a vertical split
+v = ":sh tmux new-window -n fx '~/.config/helix/yazi-picker.sh vsplit'"
+# Open file(s) in a horizontal split
+s = ":sh tmux new-window -n fx '~/.config/helix/yazi-picker.sh hsplit'"

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+brew update 
+brew bundle --cleanup --file=/dev/stdin <<EOF
+{{ range .packages.all.brews -}}
+brew {{ . | quote }}
+{{ end -}}
+{{ if eq .chezmoi.os "darwin" -}}
+{{ range .packages.darwin.casks -}}
+cask {{ . | quote }}
+{{ end -}}
+{{ end -}}
+EOF
+brew upgrade

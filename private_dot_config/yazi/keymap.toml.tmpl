@@ -1,0 +1,23 @@
+[[mgr.prepend_keymap]]
+on   = "l"
+run  = "plugin smart-enter"
+desc = "Enter the child directory, or open the file"
+
+{{- if eq .chezmoi.hostname "arch" }}
+
+[[mgr.prepend_keymap]]
+on  = "<C-n>"
+run = '''
+	shell 'dragon-drop -a -x "$1"'
+'''
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "." ]
+run  = "cd ~/.dotfiles"
+desc = "Goto ~/.dotfiles"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "p" ]
+run  = "cd ~/Desktop/project/"
+desc = "Goto ~/Desktop/project/"
+{{- end }}

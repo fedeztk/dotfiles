@@ -1,0 +1,85 @@
+[ -z "$TMUX" ] && [[ "$TERM_PROGRAM" != "vscode" ]] && command -v tmux &> /dev/null && exec tmux && exit
+
+# so as not to be disturbed by Ctrl-S ctrl-Q in terminals:
+stty -ixon
+
+# provide a simple prompt till the theme loads
+PS1="ready> " 
+
+setopt promptsubst
+setopt appendhistory
+setopt inc_append_history
+setopt share_history
+setopt auto_cd
+
+bindkey -v
+autoload -Uz compinit
+# avoid file in HOME
+compinit -d "$XDG_CACHE_HOME"/zsh/zcompdump-"$ZSH_VERSION"
+
+compdef kubecolor=kubectl
+
+# eval and eompletions 
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
+# source <(k3d completion zsh)
+# source <(helm completion zsh)
+
+# aliases and functions
+source $HOME/.config/zsh/aliases
+source $HOME/.config/zsh/functions
+
+# antidote plugin manager
+# source ${ZDOTDIR:-~}/.antidote/antidote.zsh
+source $HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh
+antidote load
+
+# case insensitive and fuzzy auto completion
+zstyle ':completion:*' matcher-list 'r:[[:ascii:]]||[[:ascii:]]=** r:|=* m:{a-z\-}={A-Z\_}'
+zstyle ":completion:*:git-checkout:*" sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+zstyle ':fzf-tab:*' fzf-bindings 'tab:toggle+down' # consistent with fzf.vim
+
+# Change cursor shape for different vi modes.
+function zle-keymap-select {
+if [[ ${KEYMAP} == vicmd ]] ||
+  [[ $1 = 'block' ]]; then
+  echo -ne '\e[1 q'
+elif [[ ${KEYMAP} == main ]] ||
+    [[ ${KEYMAP} == viins ]] ||
+    [[ ${KEYMAP} = '' ]] ||
+    [[ $1 = 'beam' ]]; then
+ echo -ne '\e[5 q'
+fi
+}
+zle -N zle-keymap-select
+zle-line-init() {
+    echo -ne "\e[5 q"
+}
+zle -N zle-line-init
+echo -ne '\e[5 q' # Use beam shape cursor on startup.
+preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+# keybindings
+bindkey "^[[C" forward-char
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-kill-word
+bindkey "^@" autosuggest-execute
+bindkey "^P" history-beginning-search-backward
+bindkey "^N" history-beginning-search-forward
+
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+
+bindkey -s '^o' 'y\n'
+bindkey -s '^g' 'btm -b\n'
+bindkey -s '^s' 'edit_script\n'
+bindkey -s '^f' 'edit_file\n'
+bindkey -s '^h' 'howto\n'
+bindkey '^j' jq-complete
+autoload edit-command-line; zle -N edit-command-line; bindkey '^e' edit-command-line

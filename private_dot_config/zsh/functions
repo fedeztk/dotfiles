@@ -1,0 +1,198 @@
+#! /bin/bash
+
+print_error() {
+  echo -e "\e[31m  $1\e[0m"
+}
+
+print_ok() {
+  echo -e "\e[32m  $1\e[0m"
+}
+
+print_check() {
+  if [ $? -eq 0 ]; then
+    print_ok "$1"
+  else
+    print_error "$1"
+  fi
+}
+
+highlight() {
+  local grep_query="$1"
+  shift
+  grep --color=always -E "$grep_query|$" "$@"
+}
+
+# fzf previews piped to (n)vim
+edit_script() {
+  script_name="$(find -L "$HOME"/.config/script -type "f,l" | fzf --reverse --margin=10% --preview='bat {}')"
+  if [ -n "$script_name" ]; then
+    "$EDITOR" "$script_name"
+  fi
+}
+
+edit_file() {
+  file_name="$(find -L . -type "f,l" | fzf --reverse --margin=10% --preview='bat {}')"
+  if [ -n "$file_name" ]; then
+    "$EDITOR" "$file_name"
+  fi
+}
+
+# fzf buffer for killing processes, or alternatively any menu set via $1
+kp() {
+  if [[ -z $1 ]]; then
+    kp_menu="fzf --reverse --margin=10% -m --header='[kill:process]'"
+  else
+    kp_menu="$1"
+    shift 1
+  fi
+
+  pid=$(ps -ef | sed 1d | eval "$kp_menu" | awk '{print $2}')
+
+  if [ -n "$pid" ]; then
+    echo "$pid" | xargs kill -"${1:-9}" && notify-send -u low "Process $pid killed" || notify-send -u critical "Unable to kill process $pid!"
+    kp "$kp_menu"
+  fi
+}
+
+mem() {
+  [[ -z $1 ]] && echo "Usage: mem name_of_program" && return 1
+  local pid
+  pid=$(pgrep "$1" | head -n 1)
+  [[ -z $pid ]] && echo "Process $1 not found!" && return 1
+  ps_mem -p "$pid"
+}
+
+lfcd() {
+  tmp="$(mktemp)"
+  lf -last-dir-path="$tmp" "$@"
+  if [ -f "$tmp" ]; then
+    dir="$(cat "$tmp")"
+    rm -f "$tmp" >/dev/null
+    [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir" || return 0
+  fi
+}
+
+y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
+
+rga-fzf() {
+  RG_PREFIX="rg --hidden --files-with-matches"
+  local file
+  file="$(
+    FZF_DEFAULT_COMMAND="$RG_PREFIX '$1'" \
+      fzf --sort --preview="[[ ! -z {} ]] && rg --pretty --context 5 {q} {}" \
+      --phony -q "$1" \
+      --bind "change:reload:$RG_PREFIX {q}" \
+      --preview-window="70%:wrap"
+  )" &&
+    echo "opening $file" &&
+    xdg-open "$file"
+}
+
+howto() {
+  cht.sh "$(cht.sh :list | IFS=+ fzf --preview 'cht.sh {}' -q "$*")"
+}
+
+fzf_file_browser() {
+  while true; do
+    # In exa, COLUMNS=1 is a workaround for symlinks, see https://github.com/ogham/exa/issues/951
+    # First result, current wd (".") is deleted since it's useless
+    selected=$(COLUMNS=1 exa --icons -G -aa --color=always --group-directories-first |
+      sed 1d |
+      fzf --ansi --prompt="$(pwd)> " --margin=10% --preview \
+        'partial={}; name=${partial:2}; [ -d $name ] && exa -1 --color=always $name || bat $name')
+
+    [ -z "$selected" ] && cd "$(pwd)" && return 0
+
+    selected=${selected:2}
+    [ -d "$selected" ] && cd "$selected" || $EDITOR "$selected"
+  done
+}
+
+myip() {
+  printf "public  :%15s\n" "$(curl -s ifconfig.me)"
+  printf "private :%15s\n" "$(hostname -i)"
+}
+
+mylocate() {
+  file_name=$(locate "$*" | fzf --reverse --margin=10% --preview='bat {}')
+  if [ -n "$file_name" ]; then
+    "$EDITOR" "$file_name"
+  fi
+}
+
+vw() {
+  local executable
+  executable=$(command which --skip-alias --skip-functions "$1" 2>/dev/null) || {
+    exit_code=$?
+    echo "unable to find executable $1"
+    return "$exit_code"
+  }
+  $EDITOR "$executable"
+}
+
+# womp: what's on my port?
+womp() {
+  local pid
+  match="$1"
+  pid=$(ss -tulpn | fzf --reverse --header="Select a port to view" --query="$match" | grep -oP '(?<=pid=)\d+')
+
+  if [ -n "$pid" ]; then
+    printf "Do you want to kill the process %s with PID: %s? [y/N] " "$(ps -p "$pid" -o comm=)" "$pid"
+    read -r answer
+    if [[ "$answer" == "y" ]]; then
+      kill -9 "$pid"
+    fi
+  fi
+}
+
+sshm() {
+  hosts=$(grep -E 'Host\s+\w+' ~/.ssh/config | awk '{print $2}')
+  host=$(echo "$hosts" | fzf --reverse --header="Select a host to connect to" --query="$*")
+  [ -n "$host" ] && ssh "$host"
+}
+
+new_sesh() {
+  local sessionname
+  sessionname="$1"
+
+  if [ -z "$sessionname" ]; then
+    return 1
+  fi
+
+  mkdir ~/projects/"$sessionname"
+
+  if [ $? -ne 0 ]; then
+    "Unable to create directory ~/projects/$sessionname, session may already exist"
+    return 1
+  fi
+
+  note=$(gum input)
+
+  if [ -n "$note" ]; then
+    note="gum style --background 215 --foreground 0 '$note';"
+  fi
+
+  echo "[[session]]
+name = \"$sessionname\"
+path = \"~/projects/$sessionname/\"
+startup_command = \"$note tmux split-window && tmux send-keys -t 1 'sshm $sessionname' Enter; ks ctx $sessionname\"
+" >>~/.config/sesh/sesh.toml #  $sessionname is now always a context
+}
+
+ks() {
+  if [[ "$1" == "ctx" || "$1" == "ns" || "$1" == "edit" ]]; then
+    target=$(kubie "$1" | fzf --query "$2" --header="Select a $1 to connect to")
+    if [ -n "$target" ]; then
+      kubie "$1" $target
+    fi
+  else
+    kubie "$@"
+  fi
+}

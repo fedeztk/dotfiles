@@ -1,0 +1,59 @@
+#!/bin/bash
+alias vi='nvim'
+alias v=$EDITOR
+
+alias sl=ls
+alias sll=ls
+alias ll='ls -l'
+alias la='ls -a'
+alias lA='ll -a'
+alias ls='ls --color=always'
+
+# use eza if installed
+if [ -x "$(command -v eza)" ]; then
+  alias ls='eza --group-directories-first'
+  # icons ls variation
+  alias is='ls --icons'
+  alias il='ls -l --icons'
+  alias ia='ls -a --icons'
+  alias iA='ll -a --icons'
+
+  alias tree='eza --tree'
+  alias iree='eza --tree --icons'
+fi
+
+alias cp='cp -i'
+alias rm='rm -I'
+alias mv='mv -i'
+
+alias cd='z'
+
+alias c='clear'
+
+alias super='sudo $(fc -ln -1)'
+
+alias gl='lazygit'
+
+alias dl='lazydocker'
+
+alias getidofgroup="getent group | cut -d: -f1 | fzf | xargs getent group | cut -d: -f3"
+
+alias kubectl=kubecolor
+alias oc="env KUBECTL_COMMAND=oc kubecolor"
+alias k="kubectl"
+alias mk=minikube
+alias os=openstack
+alias tf=terraform
+# alias ks=kubie
+alias kcm="k konfig merge ~/.kube/configs/* ~/.kube/config > ~/.kube/config"
+alias kci="kubectl konfig import --save new-cfg"
+alias by="bat --language=yaml"
+alias ky="kubectl api-resources --no-headers=true | fzf --preview 'kubectl explain {1} | bat --language=yaml  --color=always -p' --preview-window=down:50%"
+
+alias tldr='cht.sh'
+
+alias command_count="awk '{print $1}' $HISTFILE | sort | uniq -c | sort -nr | head -10"
+
+alias docker_clean='docker system prune -a --volumes'
+
+alias watt_usage="awk '{print \$1*10^-6 \" W\"}' /sys/class/power_supply/BAT0/power_now"

@@ -19,6 +19,7 @@ packages:
       - zoxide
       - delta
       - rlwrap # need for cheat.sh
+      - fzf
       # Language servers
       - gopls
       - shellcheck

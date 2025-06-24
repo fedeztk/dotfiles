@@ -1,4 +1,6 @@
 #!/bin/bash
+ 
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 brew update 
 brew bundle --cleanup --file=/dev/stdin <<EOF

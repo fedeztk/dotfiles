@@ -20,7 +20,11 @@ compinit -d "$XDG_CACHE_HOME"/zsh/zcompdump-"$ZSH_VERSION"
 compdef kubecolor=kubectl
 
 # eval and eompletions 
+{{- if eq .chezmoi.os "darwin" }}
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{- else }}
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{- end }}
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
 # source <(k3d completion zsh)

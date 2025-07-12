@@ -20,7 +20,11 @@ MANPAGER=$PAGER
 PATH="$HOME/.local/bin:$PATH"
 PATH="$HOME/.cargo/bin:$PATH"
 PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+{{- if eq .chezmoi.os "darwin" }}
+PATH="/opt/homebrew/bin:$PATH"
+{{- else }}
 PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+{{- end }}
 
 CHTSH_QUERY_OPTIONS="style=lovelace"
 

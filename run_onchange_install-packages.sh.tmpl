@@ -3,7 +3,9 @@
 brew update 
 brew bundle --cleanup --file=/dev/stdin <<EOF
 {{ range .packages.all.brews -}}
-brew {{ . | quote }}
+{{ $pkg_line := . | splitList "," -}}
+{{ $pkg_name := $pkg_line | first | quote -}}
+brew {{ $pkg_name }}{{ if gt (len $pkg_line) 1 }},{{ end }}{{ $pkg_line | rest | join "," }}
 {{ end -}}
 {{ if eq .chezmoi.os "darwin" -}}
 {{ range .packages.darwin.casks -}}

@@ -9,7 +9,9 @@ brew {{ $pkg_name }}{{ if gt (len $pkg_line) 1 }},{{ end }}{{ $pkg_line | rest |
 {{ end -}}
 {{ if eq .chezmoi.os "darwin" -}}
 {{ range .packages.darwin.casks -}}
-cask {{ . | quote }}
+{{ $pkg_line := . | splitList "," -}}
+{{ $pkg_name := $pkg_line | first | quote -}}
+cask {{ $pkg_name }}{{ if gt (len $pkg_line) 1 }},{{ end }}{{ $pkg_line | rest | join "," }}
 {{ end -}}
 {{ end -}}
 EOF

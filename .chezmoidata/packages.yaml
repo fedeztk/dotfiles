@@ -3,7 +3,7 @@ packages:
     brews:
       - chezmoi
       - antidote
-      - helix, args:["HEAD"]
+      - helix
       - lazygit
       - ripgrep
       - fd
@@ -21,6 +21,12 @@ packages:
       - delta
       - rlwrap # need for cheat.sh
       - fzf
+      # k8s related
+      - kubectl
+      - krew
+      - k9s
+      - kubecolor
+      - helm
       # Language servers
       - gopls
       - shellcheck
@@ -33,6 +39,7 @@ packages:
     - middleclick
     - raycast
     - betterdisplay
-    - karabiner-elements
+    # - karabiner-elements
     # - reminders-menubar
     - command-x
+    - logi-options+
